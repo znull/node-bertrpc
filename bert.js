@@ -44,6 +44,12 @@ function BertBinary(Obj) {
 	this.toString = function() { return "<<\"" + Obj + "\">>" };
 }
 
+function BertString(Obj) {
+	this.type = "Str";
+	this.value = Obj;
+	this.toString = function() { return "<<\"" + Obj + "\">>" };
+}
+
 function BertTuple(Arr) {
 	this.type = "Tuple";
 	this.length = Arr.length;
@@ -89,6 +95,10 @@ BertClass.prototype.tuple = function() {
 	return new BertTuple(arguments);
 }
 
+BertClass.prototype.string = function(Obj) {
+	return new BertString(Obj);
+}
+
 
 
 // - ENCODING - 
@@ -99,7 +109,11 @@ BertClass.prototype.encode_inner = function(Obj) {
 }
 
 BertClass.prototype.encode_string = function(Obj) {
-	return this.STRING + this.int_to_bytes(Obj.length, 2) + Obj;
+	return this.BINARY + this.int_to_bytes(Obj.length, 4) + Obj;
+}
+
+BertClass.prototype.encode_str = function(Obj) {
+	return this.STRING + this.int_to_bytes(Obj.value.length, 2) + Obj.value;
 }
 
 BertClass.prototype.encode_boolean = function(Obj) {
@@ -234,7 +248,7 @@ BertClass.prototype.decode_binary = function(S) {
 	var Size = this.bytes_to_int(S, 4);
 	S = S.substring(4);
 	return {
-		value: Bert.binary(S.substring(0, Size)),
+		value: S.substring(0, Size),
 		rest:  S.substring(Size)
 	};	
 }
