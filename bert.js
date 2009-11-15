@@ -460,5 +460,9 @@ BertClass.prototype.test_decode = function() {
 
 var Bert = new BertClass();
 
+// node.js
+if ( exports )
+  process.mixin(exports, Bert);
+
 // Bert.test_encode();
 // Bert.test_decode();
