@@ -1,0 +1,39 @@
+                         bertrpc.js
+
+This is a BERT-RPC <http://bert-rpc.org> server built on
+node.js  <http://nodejs.org/>,  the V8 based evented IO
+framework.
+
+The  bert.js  library  was  taken  from  Rusty Klophaus's
+BERT-JS  project: <http://github.com/rklophaus/BERT-JS>.
+
+INSTALL
+
+node.js must be installed and available on your PATH
+before continuing.
+
+USAGE
+
+Once you have node installed, grab a clone of the
+node-bertrpc git repo
+
+    $ git clone git://github.com/rtomayko/node-bertrpc
+    $ cd node-bertrpc
+    $ node examples/mathrpc.js
+      <--  exposing: math
+
+Now use a BERTRPC client to connect:
+
+    $ irb -rubygems -rbertrpc
+    >> remote = BERTRPC::Service('localhost', 7000)
+    >> remote.call.math.sum([1, 2, 3, 4, 5])
+    => 15
+
+You should also see something like the following output from
+the server:
+
+    -->  connect
+    -->  [45] {call,math,sum,1,2,3,4,5}
+    <--  [13] {reply, 15}
+    -->  eof
+    <--  close
