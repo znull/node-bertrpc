@@ -342,9 +342,9 @@ BertClass.prototype.int_to_bytes = function(Int, Length) {
 // of the supplied string.
 BertClass.prototype.bytes_to_int = function(S, Length) {
 	var Num = 0;
-	var isNegative = (String.charCodeAt(S[0]) > 128);
+	var isNegative = (S.charCodeAt(0) > 128);
 	for (var i=0; i<Length; i++) {
-		var n = String.charCodeAt(S[i]);
+		var n = S.charCodeAt(i);
 		if (isNegative) n = 255 - n;
 		if (Num == 0) Num = n;
 		else Num = Num * 256 + n;
