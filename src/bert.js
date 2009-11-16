@@ -10,10 +10,6 @@
 // Copyright (c) 2009 Rusty Klophaus (@rklophaus)
 // Contributions by Ben Browning (@bbrowning)
 //
-// References:
-// - http://www.erlang-factory.com/upload/presentations/36/tom_preston_werner_erlectricity.pdf
-// - http://www.erlang.org/doc/apps/erts/erl_ext_dist.html#8
-//
 // TODO time
 // TODO regex
 // TODO push / streaming

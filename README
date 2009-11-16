@@ -1,39 +1,137 @@
                          bertrpc.js
 
-This is a BERT-RPC <http://bert-rpc.org> server built on
-node.js  <http://nodejs.org/>,  the V8 based evented IO
-framework.
+This is a BERT-RPC server and client library for
+node.js <http://nodejs.org/>, the V8 based evented
+IO framework.
 
-The  bert.js  library  was  taken  from  Rusty Klophaus's
-BERT-JS  project: <http://github.com/rklophaus/BERT-JS>.
+BERT-RPC is a schemaless binary remote procedure call
+protocol by Tom Preston-Werner, based on the BERT
+(Binary ERlang Term) serialization format.
+
+See <http://bert-rpc.org/> for more information about
+BERT and BERT-RPC, including additional language
+implementations.
+
+The  bert.js library  was  taken  from  Rusty Klophaus's
+BERT-JS  project:  <http://github.com/rklophaus/BERT-JS>
+but has been modified quite a bit at this point.
 
 INSTALL
 
 node.js must be installed and available on your PATH
-before continuing.
+before continuing. It's trivial:
 
-USAGE
+    cd /tmp
+    curl -L http://bit.ly/nodejs | tar xvzf -
+    cd node-*
+    ./configure PREFIX=/usr/local
+    make && sudo make install
+
+EXAMPLES
 
 Once you have node installed, grab a clone of the
 node-bertrpc git repo
 
     $ git clone git://github.com/rtomayko/node-bertrpc
     $ cd node-bertrpc
-    $ node examples/mathrpc.js
-      <--  exposing: math
+    $ node examples/helloworld.js
+      <--  exposing: say [funs: hello, echo]
 
-Now use a BERTRPC client to connect:
+Leave that there and then run the example client in a
+separate shell:
 
-    $ irb -rubygems -rbertrpc
-    >> remote = BERTRPC::Service('localhost', 7000)
-    >> remote.call.math.sum([1, 2, 3, 4, 5])
-    => 15
+    $ node examples/helloclient.js
 
-You should also see something like the following output from
+You should see something like the following output from
 the server:
 
-    -->  connect
-    -->  [45] {call,math,sum,1,2,3,4,5}
-    <--  [13] {reply, 15}
-    -->  eof
-    <--  close
+      -->   connect
+      -->   30: {call, say, hello, []}
+      <--   21: {reply, <<"hello">>}
+      -->   45: {call, say, echo, [<<"Hello World">>]}
+      <--   33: {reply, [<<"Hello World">>]}
+      -->   85: {call, say, echo, [[{foo, <<"bar">>}, {bar, <<"baz">>}], 21]}
+      <--   73: {reply, [[{foo, <<"bar">>}, {bar, <<"baz">>}], 21]}
+      -->   eof
+      <--   close
+
+Connect with the Ruby BERT-RPC client (or any other
+BERT-RPC client) to play at a REPL:
+
+    $ sudo gem install bertrpc -s http://gemcutter.org/
+    $ irb -rubygems -rbertrpc
+    >> service = BERTRPC::Service('localhost', 7000)
+    >> service.call.say.echo('hello', 'world', { 'foo' => %w[bar baz bizle] })
+    => ["hello", "world", {:foo=>["bar", "baz", "bizzle"]}]
+
+BERT-RPC SERVERS
+
+Require the "bertrpc" lib and expose objects:
+
+    var rpc = require('bertrpc');
+    rpc.expose('hello', {
+       add: function (a, b) {
+          return a + b;
+       },
+       subtract: function (a, b) {
+          return a - b;
+       }
+    });
+
+    rpc.listen(7001, 'localhost');
+
+Start the node server by running your script directly:
+
+    node yourstuff.js
+
+That exposes a BERT-RPC module named "hello" with two
+remotely callable functions: "add" and "subtract" but you
+can pass any object to expose to make all of its functions
+available.
+
+BERT-RPC CLIENTS
+
+The BERT-RPC client library is still very experimental and
+likely to change significantly:
+
+    var sys = require('sys'),
+        rpc = require('bertrpc');
+    rpc.connect(7001, 'localhost', function (service) {
+       sys.puts("client calling the add fun in the hello module");
+       service.call('hello', 'add', [1, 2], function (result) {
+          sys.puts("client received response: " + sys.inspect(result));
+          // do something useful
+       });
+    });
+
+BERT ENCODING / DECODING
+
+The bert.js library includes functions for encoding,
+decoding, and getting a formatting string representation of
+BERT objects.
+
+Get in a REPL:
+
+    $ NODE_PATH=./src node-repl
+    Welcome to the Node.js REPL.
+    Enter ECMAScript at the prompt.
+    node> bert = require('bert');
+
+bert.encode serializes an object graph as a BERT:
+
+    node> holabert = bert.encode('hello')
+    "\u0083m\u0000\u0000\u0000\u0005hello"
+    node> sys.puts(bert.bin_repr(holabert))
+    <<131,109,0,0,0,5,104,101,108,108,111>>
+
+bert.decode deserializes a BERT, creating an object graph:
+
+    node> bert.decode("\u0083m\u0000\u0000\u0000\u0005hello")
+    "hello"
+
+SEE ALSO
+
+CODE: git clone git://github.com/rtomayko/node-bertrpc.git
+HOME: http://github.com/rtomayko/node-bertrpc/
+BUGS: http://github.com/rtomayko/node-bertrpc/issues
+COPY: See the file COPYING (it's MIT)

@@ -10,7 +10,9 @@
 // <http://github.com/rtomayko/node-bertrpc>
 //
 // TODO errors
-// TODO client
+// TODO client interface should be more node-like
+// TODO better client calling interface
+// TODO cast
 
 var sys = require('sys'),
     tcp = require('tcp'),
@@ -26,10 +28,14 @@ var bytes_to_int = bert.bytes_to_int,
 var modules = {};
 
 var BERTRPC = {
+
+   /* BERT-RPC SERVER IMPLEMENTATION */
+
    // Direct access to the modules dictionary.
    modules: modules,
 
-   // Expose all functions in object under the given BERTPRPC module name.
+   // Expose all functions in object under the given BERTPRPC module
+   // name. This should be called before bertrpc.listen.
    expose: function (mod, object) {
       var funs = [];
       for (var fun in object) {
@@ -40,6 +46,11 @@ var BERTRPC = {
 
       modules[mod] = object;
       return object;
+   },
+
+   // Begin listing on the port and host specified.
+   listen: function (port, host) {
+      BERTRPC.server.listen(port, host);
    },
 
    // Dispatch a call or cast on an exposed module function. This is
@@ -66,7 +77,40 @@ var BERTRPC = {
       sys.puts("   " + direction + "   " + message);
    },
 
-   // Connect to a remote BERT-RPC service.
+   // The node tcp.Server object -- ready to go. Use BERTRPC.listen
+   // if you just want to start a server.
+   server: tcp.createServer(function (socket) {
+      var trace = BERTRPC.trace;
+      socket.setEncoding("binary");
+
+      socket.addListener("connect", function () { trace("-->", "connect") });
+
+      socket.addListener("eof", function () {
+         trace("-->", "eof");
+         socket.close();
+         trace("<--", "close");
+      });
+
+      // read BERPs off the wire and dispatch.
+      BERTRPC.read(socket, function (size, term) {
+         trace("-->", "" + size + ": " + bert.repr(term));
+
+         // dispatch call to module handler
+         var type = term[0].toString(),
+              mod = term[1].toString(),
+              fun = term[2].toString(),
+             args = term[3];
+         var res = BERTRPC.dispatch(type, mod, fun, args);
+
+         // encode and throw back over the wire
+         var reply = t(_reply, res);
+         var len = BERTRPC.write(socket, reply);
+         trace("<--", "" + len + ": " + bert.repr(reply));
+      });
+   }),
+
+   // Connect to a remote BERT-RPC service. This is the main client
+   // interface.
    connect: function (port, host, callback) {
       var socket = tcp.createConnection(port, host),
       promises = [],
@@ -124,42 +168,6 @@ var BERTRPC = {
       });
 
       return client;
-   },
-
-   // The node server. Ready to rock and roll.
-   server: tcp.createServer(function (socket) {
-      var trace = BERTRPC.trace;
-      socket.setEncoding("binary");
-
-      socket.addListener("connect", function () { trace("-->", "connect") });
-
-      socket.addListener("eof", function () {
-         trace("-->", "eof");
-         socket.close();
-         trace("<--", "close");
-      });
-
-      // read BERPs off the wire and dispatch.
-      BERTRPC.read(socket, function (size, term) {
-         trace("-->", "" + size + ": " + bert.repr(term));
-
-         // dispatch call to module handler
-         var type = term[0].toString(),
-              mod = term[1].toString(),
-              fun = term[2].toString(),
-             args = term[3];
-         var res = BERTRPC.dispatch(type, mod, fun, args);
-
-         // encode and throw back over the wire
-         var reply = t(_reply, res);
-         var len = BERTRPC.write(socket, reply);
-         trace("<--", "" + len + ": " + bert.repr(reply));
-      });
-   }),
-
-   // Begin listing on the port and host specified.
-   listen: function (port, host) {
-      BERTRPC.server.listen(port, host);
    },
 
    // Read BERPs off the wire and call the callback provided. The
