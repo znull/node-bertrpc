@@ -184,7 +184,7 @@ BERT = {
          return this.encode_tuple(obj);
       if (obj.type == 'bytelist')
          return this.encode_bytelist(obj);
-      if (obj.constructor.toString().indexOf("Array") != -1)
+      if (obj.constructor.toString().indexOf("Array") >= 0)
          return this.encode_list(obj);
       return this.encode_dictionary(obj);
    },
@@ -452,6 +452,7 @@ BERT = {
 
    // pretty print a JS object in erlang term form
    repr: function (obj) {
+      var sys = require('sys');
       if (obj == null)
          return "nil";
 
@@ -459,15 +460,18 @@ BERT = {
          return "<<\"" + obj + "\">>";
 
       // numbers, booleans, stuff like that
-      if (typeof(obj) != 'object')
+      if (typeof(obj) != 'object') {
          return obj.toString();
+      }
 
       // BERT special types: atom, tuple, bytelist
-      if (obj.repr)
+      if (obj.repr) {
          return obj.repr();
+      }
 
       // arrays
-      if (obj.constructor.toString().indexOf("Array")) {
+      if (obj.constructor.toString().indexOf("Array") >= 0) {
+         sys.puts(sys.inspect(obj.constructor));
          var s = "";
          for (var i = 0; i < obj.length; i++) {
             if (i > 0) s += ", ";
@@ -483,10 +487,10 @@ BERT = {
          if ( typeof(key) == 'string' )
             key = BERT.atom(key);
          if ( prev ) s += ", ";
-         s += "{" + BERT.repr(key) + ", " + BERT.repr(val) + "}";
+         s += BERT.repr(BERT.tuple(key, val));
          prev = val;
       }
-      return s;
+      return "[" + s + "]";
    }
 };
 
