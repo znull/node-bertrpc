@@ -62,36 +62,47 @@ BERT = {
    Atom: function (string) {
       this.type = "atom";
       this.value = string;
+      this.repr = function () { return string }
       this.toString = function () { return string };
    },
 
    Bytelist: function (string) {
       this.type = "bytelist";
       this.value = string;
-      this.toString = function () { return "[" + BERT.string + "]"; };
+      this.toString = function () { this.value }
+      this.repr = function () {
+         var bytes = BERT.string_to_bytelist(this.value),
+             string= "";
+         for (var i=0; i < bytes.length; i++) {
+            if (i > 0) string += ",";
+            string += bytes[i];
+         }
+         return "<<" + string + ">>";
+      }
    },
 
    Tuple: function (array) {
       this.type = "tuple";
       this.length = array.length;
       this.value = array;
-      for (var i=0; i < array.length; i++) {
+      for (var i=0; i < array.length; i++)
          this[i] = array[i];
-      }
-      this.toString = function () {
+      this.repr = function () {
          var s = "";
          for (var i=0; i < this.length; i++) {
-            if (s != "") s += ", ";
-            s += this[i].toString();
+            if (i > 0) s += ", ";
+            s += BERT.repr(this.value[i]);
          }
          return "{" + s + "}";
       }
+      this.toString = this.repr;
    },
 
    /* CASTING TO BERT TYPES */
 
    atom: function (string) { return new BERT.Atom(string); },
    tuple: function () { return new BERT.Tuple(arguments); },
+   tup: function (array) { return new BERT.Tuple(array); },
    bytelist: function (string) { return new BERT.Bytelist(string); },
    binary: function (string) { return string; },
    list: function (array) { return list; },
@@ -165,6 +176,8 @@ BERT = {
    },
 
    encode_object: function (obj) {
+      if (obj == null)
+         return this.encode_null(obj);
       if (obj.type == 'atom')
          return this.encode_atom(obj);
       if (obj.type == 'tuple')
@@ -217,6 +230,10 @@ BERT = {
       return this.encode_list(array);
    },
 
+   encode_null: function (obj) {
+      return this.NIL;
+   },
+
    /* DECODING */
 
    decode_inner: function (data) {
@@ -242,10 +259,15 @@ BERT = {
       var size = this.bytes_to_int(data, count);
       data = data.substring(count);
       var value = data.substring(0, size);
-      if (value == "true") value = true;
-      if (value == "false") value = false;
+      if (value == "true") {
+         value = true;
+      } else if (value == "false") {
+         value = false;
+      } else {
+         value = this.atom(value);
+      }
       return {
-         value: this.atom(value),
+         value: value,
          rest:  data.substring(size)
       };
    },
@@ -290,7 +312,7 @@ BERT = {
       var size = this.bytes_to_int(data, 2);
       data = data.substring(2);
       return {
-         value: data.substring(0, size),
+         value: this.bytelist(data.substring(0, size)),
          rest:  data.substring(size)
       };
    },
@@ -323,14 +345,14 @@ BERT = {
          data = element.rest;
       }
       return {
-         value: this.tuple(array),
+         value: this.tup(array),
          rest:  data
       };
    },
 
    decode_nil: function (data) {
       return {
-         value: new Array(),
+         value: null,
          rest:  data
       };
    },
@@ -408,28 +430,59 @@ BERT = {
    },
 
    // Convert an array of bytes into a string.
-   bytes_to_string: function (bytes) {
+   bytelist_to_string: function (bytes) {
       var string = "";
       for (var i=0; i < bytes.length; i++)
          string += String.fromCharCode(bytes[i]);
       return string;
    },
 
-   /* FORMATTING */
-
-   // pretty print a byte-string in erlang binary form
-   pp_bytes: function (bin) {
-      string = "";
-      for (var i=0; i < bin.length; i++) {
-         if (string != "") string += ",";
-         string += "" + bin.charCodeAt(i);
-      }
-      return "<<" + string + ">>";
+   string_to_bytelist: function (string) {
+      var bytelist = new Array();
+      for (var i=0; i < string.length; i++)
+         bytelist[i] = string.charCodeAt(i);
+      return bytelist;
    },
 
+   /* FORMATTING */
+
    // pretty print a JS object in erlang term form
-   pp_term: function (object) {
-      return object.toString();
+   repr: function (obj) {
+      if (obj == null)
+         return "nil";
+
+      if (typeof(obj) == 'string')
+         return "<<\"" + obj + "\">>";
+
+      // numbers, booleans, stuff like that
+      if (typeof(obj) != 'object')
+         return obj.toString();
+
+      // BERT special types: atom, tuple, bytelist
+      if (obj.repr)
+         return obj.repr();
+
+      // arrays
+      if (obj.constructor.toString().indexOf("Array")) {
+         var s = "";
+         for (var i = 0; i < obj.length; i++) {
+            if (i > 0) s += ", ";
+            s += BERT.repr(obj[i])
+         }
+         return "[" + s + "]";
+      }
+
+      // Assume it's a dictionary
+      var s = "", prev = null;
+      for (var key in obj) {
+         var val = obj[key];
+         if ( typeof(key) == 'string' )
+            key = BERT.atom(key);
+         if ( prev ) s += ", ";
+         s += "{" + BERT.repr(key) + ", " + BERT.repr(val) + "}";
+         prev = val;
+      }
+      return s;
    },
 
    /* TESTS */
@@ -438,7 +491,7 @@ BERT = {
    test_encode: function () {
       var sys = require('sys'),
        encode = BERT.encode,
-           pp = function (obj) { sys.puts(BERT.pp_bytes(obj)) };
+           pp = function (obj) { sys.puts(BERT.bytelist(obj).repr()) };
       pp(encode(BERT.atom("hello")));
       pp(encode(BERT.binary("hello")));
       pp(encode(true));
@@ -461,8 +514,8 @@ BERT = {
 
    test_decode: function () {
       var sys = require('sys'),
-          pp  = function (term) { sys.puts(BERT.pp_term(term)); },
-          B   = BERT.bytes_to_string;
+          pp  = function (term) { sys.puts(BERT.repr(term)); },
+          B   = BERT.bytelist_to_string;
       // Try decoding this: [{atom, myAtom},{binary, <<"My Binary">>},{bool, true}, {string, "Hello there"}],
       TestTerm1 = B([131,108,0,0,0,4,104,2,100,0,4,97,116,111,109,100,0,6,109,121,65,116,111,109,104,2,100,0,6,98,105,110,97,114,121,109,0,0,0,9,77,121,32,66,105,110,97,114,121,104,2,100,0,4,98,111,111,108,100,0,4,116,114,117,101,104,2,100,0,6,115,116,114,105,110,103,107,0,11,72,101,108,108,111,32,116,104,101,114,101,106]);
       pp(BERT.decode(TestTerm1));
