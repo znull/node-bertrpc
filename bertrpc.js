@@ -12,20 +12,21 @@ var bytes_to_int = bert.bytes_to_int,
 var modules = { };
 
 var BERTRPC = {
-  _modules: {},
-
+  /* expose all functions in object under the given module name. */
   expose: function (mod, object) {
     modules[mod] = object;
     sys.puts("  <--  exposing: " + mod);
     return object;
   },
 
+  /* dispatch a call or cast on the module and function */
   dispatch: function (type, mod, fun, args) {
     var module = modules[mod];
     var func = module[fun.toString()];
     return func.apply(module, args);
   },
 
+  /* the node server */
   server: function () {
     return tcp.createServer(function (socket) {
       socket.setEncoding("binary");
@@ -74,6 +75,7 @@ var BERTRPC = {
     });
   },
 
+  /* begin listing on the port and host specified */
   listen: function (port, host) {
     BERTRPC.server().listen(port, host);
   }
