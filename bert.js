@@ -38,16 +38,10 @@ function BertAtom(Obj) {
 	this.toString = function() { return Obj };
 }
 
-function BertBinary(Obj) {
-	this.type = "Binary";
+function BertBytelist(Obj) {
+	this.type = "Bytelist";
 	this.value = Obj;
-	this.toString = function() { return "<<\"" + Obj + "\">>" };
-}
-
-function BertString(Obj) {
-	this.type = "Str";
-	this.value = Obj;
-	this.toString = function() { return "<<\"" + Obj + "\">>" };
+	this.toString = function() { return "[" + Obj + "]"; };
 }
 
 function BertTuple(Arr) {
@@ -88,18 +82,16 @@ BertClass.prototype.atom = function(Obj) {
 }
 
 BertClass.prototype.binary = function(Obj) {
-	return new BertBinary(Obj);
+	return Obj;
+}
+
+BertClass.prototype.bytelist = function(Obj) {
+	return new BertBytelist(Obj);
 }
 
 BertClass.prototype.tuple = function() {
 	return new BertTuple(arguments);
 }
-
-BertClass.prototype.string = function(Obj) {
-	return new BertString(Obj);
-}
-
-
 
 // - ENCODING - 
 
@@ -112,7 +104,7 @@ BertClass.prototype.encode_string = function(Obj) {
 	return this.BINARY + this.int_to_bytes(Obj.length, 4) + Obj;
 }
 
-BertClass.prototype.encode_str = function(Obj) {
+BertClass.prototype.encode_bytelist = function(Obj) {
 	return this.STRING + this.int_to_bytes(Obj.value.length, 2) + Obj.value;
 }
 
@@ -158,10 +150,11 @@ BertClass.prototype.encode_float = function(Obj) {
 }
 
 BertClass.prototype.encode_object = function(Obj) {
-	// Check if it's an atom, binary, or tuple...
-	if (Obj.type == "Atom") return this.encode_atom(Obj);
-	if (Obj.type == "Binary") return this.encode_binary(Obj);
-	if (Obj.type == "Tuple") return this.encode_tuple(Obj);
+	// Check if it's an atom, string, bytelist, or tuple...
+	if (typeof(Obj) == "string") return this.encode_binary(Obj);
+	if (Obj.type == "Atom")      return this.encode_atom(Obj);
+	if (Obj.type == "Bytelist")  return this.encode_bytelist(Obj);
+	if (Obj.type == "Tuple")     return this.encode_tuple(Obj);
 	
 	// Check if it's an array...
 	var isArray = Obj.constructor.toString().indexOf("Array") != -1;
@@ -224,7 +217,7 @@ BertClass.prototype.decode_inner = function(S) {
 	if (Type == this.SMALL_BIG) return this.decode_big(S, 1);
 	if (Type == this.LARGE_BIG) return this.decode_big(S, 4);
 	if (Type == this.FLOAT) return this.decode_float(S);
-	if (Type == this.STRING) return this.decode_string(S);
+	if (Type == this.STRING) return this.decode_bytelist(S);
 	if (Type == this.LIST) return this.decode_list(S);
 	if (Type == this.SMALL_TUPLE) return this.decode_tuple(S, 1);
 	if (Type == this.LARGE_TUPLE) return this.decode_large_tuple(S, 4);
@@ -280,7 +273,7 @@ BertClass.prototype.decode_float = function(S) {
 	};
 }
 
-BertClass.prototype.decode_string = function(S) { 
+BertClass.prototype.decode_bytelist = function(S) {
 	var Size = this.bytes_to_int(S, 2);
 	S = S.substring(2);
 	return {
