@@ -57,10 +57,10 @@ test('bert.decode(<binary>)', function() {
 
 obj = true
 
-test('bert.repr(<atom>)', function() {
+test('bert.repr(true)', function() {
    dump(sys.inspect(obj));
    dump(R(obj));
-   assert_equal('true', bert.repr(obj));
+   assert_equal('<true>', bert.repr(obj));
 });
 
 test('bert.encode(true)', function() {

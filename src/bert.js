@@ -371,10 +371,12 @@ BERT = {
                 item = null;
             for(var i=0; i < list.length; i++) {
                item = list[i];
-               if ( item[0] == null ) {
+               if ( item[0] === null ) {
                   dict[null] = item[1];
                } else if ( item[0].type == 'atom' ) {
                   dict[item[0].toString()] = item[1];
+               } else {
+                  dict[item[0]] = item[1];
                }
             }
             value = dict;
@@ -492,12 +494,17 @@ BERT = {
 
    // pretty print a JS object in erlang term form
    repr: function (obj) {
-      if (obj == null)
-         return "nil";
+      if (obj === null)
+         return "<nil>";
+
+      if (obj === true)
+         return "<true>";
+
+      if (obj === false)
+         return "<false>";
 
       if (typeof(obj) == 'string')
          return "<<\"" + obj + "\">>";
-
       // numbers, booleans, stuff like that
       if (typeof(obj) != 'object') {
          return obj.toString();
