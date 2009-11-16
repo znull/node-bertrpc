@@ -65,11 +65,12 @@ test('bert.repr(<atom>)', function() {
 
 test('bert.encode(true)', function() {
    data = encode(obj);
-   assert_equal("<<131,100,0,4,116,114,117,101>>", bin(data));
+   assert_equal("<<131,104,2,100,0,4,98,101,114,116,100,0,4,116,114,117,101>>", bin(data));
 });
 
 test('bert.decode(true)', function() {
    obj = decode(data);
+   dump(sys.inspect(obj));
    assert_equal(true, obj);
 });
 
@@ -190,23 +191,28 @@ test('bert.decode([1, 2, 3])', function() {
 
 obj = {a:1, b:2, c:3};
 
-test('bert.encode({a:1, b:2, c:3})', function() {
-   data = encode(obj);
-   assert_equal(
-      "<<131,108,0,0,0,3,104,2,100,0,1,97,97,1,104,2,100,0,1,98,97,2,104,2,100,0,1,99,97,3,106>>",
-      bin(data)
-   );
-});
-
 test('bert.repr({a:1, b:2, c:3})', function() {
    dump(sys.inspect(obj));
    dump(R(obj));
    assert_equal("[{a, 1}, {b, 2}, {c, 3}]", bert.repr(obj));
 });
 
+test('bert.encode({a:1, b:2, c:3})', function() {
+   data = encode(obj);
+   assert_equal(
+      "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,0,0,0,3,104,2,100,0,1,97,97,1,104,2,100,0,1,98,97,2,104,2,100,0,1,99,97,3,106>>",
+      bin(data)
+   );
+});
+
 test('bert.decode({a:1, b:2, c:3})', function() {
+   dump(sys.inspect(obj));
    obj = decode(data);
-   assert_equal({a: 1, b:2, c:3}, obj);
+   dump(sys.inspect(obj));
+   dump(R(obj));
+   assert_equal(1, obj['a']);
+   assert_equal(2, obj['b']);
+   assert_equal(3, obj['c']);
 });
 
 // TUPLES
@@ -264,12 +270,19 @@ test('bert.repr(<complex>)', function() {
 
 test('bert.encode(<complex>)', function () {
    data = encode(obj);
-   assert_equal("<<131,108,0,0,0,2,104,2,100,0,1,97,104,3,97,1,97,2,97,3,104,2,100,0,1,98,108,0,0,0,3,97,4,97,5,97,6,106,106>>", bin(data))
+   assert_equal(
+      "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,"  +
+      "0,0,0,2,104,2,100,0,1,97,104,3,97,1,97,2,97,3,104,2,100,0,1,98," +
+      "108,0,0,0,3,97,4,97,5,97,6,106,106>>",
+      bin(data)
+   );
 });
 
 test('bert.decode(<complex>)', function() {
    obj = decode(data);
-   assert_equal('object', obj.type);
+   dump(sys.inspect(obj));
+   dump(R(obj));
+   assert_equal('object', typeof(obj));
    assert_equal('tuple',  obj.a.type);
    assert_equal(1, obj.a[0]);
    assert_equal(2, obj.a[1]);

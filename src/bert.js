@@ -40,6 +40,11 @@
  *         +--------------+----------------+
  *
  */
+
+
+// frequently used atom objects; set after BERT is defined.
+var _bert, _dict, _nil, _true, _false, _reply;
+
 BERT = {
    BERT_START:    String.fromCharCode(131),
    SMALL_ATOM:    String.fromCharCode(115),
@@ -141,8 +146,11 @@ BERT = {
    },
 
    encode_boolean: function (obj) {
-      if (obj) return this.encode_inner(this.atom("true"));
-      else return this.encode_inner(this.atom("false"));
+      if (obj) {
+         return this.encode_tup(_bert, _true);
+      } else {
+         return this.encode_tup(_bert, _false);
+      }
    },
 
    encode_number: function (obj) {
@@ -203,6 +211,7 @@ BERT = {
 
    encode_tuple: function (obj) {
       var s = "";
+
       if (obj.length < 256) {
          s += this.SMALL_TUPLE + this.int_to_bytes(obj.length, 1);
       } else {
@@ -212,6 +221,10 @@ BERT = {
          s += this.encode_inner(obj[i]);
       }
       return s;
+   },
+
+   encode_tup: function () {
+      return this.encode_tuple(this.tup(arguments));
    },
 
    encode_list: function (obj) {
@@ -227,11 +240,11 @@ BERT = {
       var array = new Array();
       for (var key in obj)
          array.push(this.tuple(this.atom(key), obj[key]));
-      return this.encode_list(array);
+      return this.encode_tup(_bert, _dict, array);
    },
 
    encode_null: function (obj) {
-      return this.NIL;
+      return this.encode_tup(_bert, _nil);
    },
 
    /* DECODING */
@@ -260,9 +273,15 @@ BERT = {
       data = data.substring(count);
       var value = data.substring(0, size);
       if (value == "true") {
-         value = true;
+         value = _true;
       } else if (value == "false") {
-         value = false;
+         value = _false;
+      } else if (value == "bert") {
+         value = _bert;
+      } else if (value == "nil") {
+         value = _nil;
+      } else if (value == "dict") {
+         value = _dict;
       } else {
          value = this.atom(value);
       }
@@ -337,17 +356,38 @@ BERT = {
 
    decode_tuple: function (data, count) {
       var size  = this.bytes_to_int(data, count),
-          array = new Array();
+          array = new Array(),
+          value = null;
       data = data.substring(count);
       for (var i=0; i < size; i++) {
          var element = this.decode_inner(data);
          array.push(element.value);
          data = element.rest;
       }
-      return {
-         value: this.tup(array),
-         rest:  data
-      };
+      if (array[0] == _bert) {
+         if ( array[1] == _dict )   {
+            var list = array[2],
+                dict = {},
+                item = null;
+            for(var i=0; i < list.length; i++) {
+               item = list[i];
+               if ( item[0] == null ) {
+                  dict[null] = item[1];
+               } else if ( item[0].type == 'atom' ) {
+                  dict[item[0].toString()] = item[1];
+               }
+            }
+            value = dict;
+         }
+         else if ( array[1] == _nil )    { value = null;  }
+         else if ( array[1] == _true )   { value = true;  }
+         else if ( array[1] == _false )  { value = false; }
+         else
+            throw 'unsupported complex tuple: {bert, ' + array[1] + '}';
+      }else{
+         value = this.tup(array);
+      }
+      return {value:value, rest:data};
    },
 
    decode_nil: function (data) {
@@ -452,7 +492,6 @@ BERT = {
 
    // pretty print a JS object in erlang term form
    repr: function (obj) {
-      var sys = require('sys');
       if (obj == null)
          return "nil";
 
@@ -471,7 +510,6 @@ BERT = {
 
       // arrays
       if (obj.constructor.toString().indexOf("Array") >= 0) {
-         sys.puts(sys.inspect(obj.constructor));
          var s = "";
          for (var i = 0; i < obj.length; i++) {
             if (i > 0) s += ", ";
@@ -493,6 +531,13 @@ BERT = {
       return "[" + s + "]";
    }
 };
+
+_bert  = BERT.atom('bert');
+_nil   = BERT.atom('nil');
+_dict =  BERT.atom('dict');
+_true  = BERT.atom('true');
+_false = BERT.atom('false');
+_reply = BERT.atom('reply');
 
 // common JS
 if ( exports )

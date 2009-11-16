@@ -21,6 +21,7 @@ TEST = {
          } else {
             result = 'E';
             _boom = boom;
+            sys.puts(boom.toString());
          }
       }
       sys.puts = _puts;
@@ -31,7 +32,7 @@ TEST = {
          sys.print(" FAIL\n");
          sys.print(output.replace(/^/, "      ") + "\n");
          TEST.failed += 1;
-         if ( _boom )  throw _boom;
+         if ( _boom ) throw _boom;
       }
    },
 
