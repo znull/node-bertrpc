@@ -446,6 +446,10 @@ BERT = {
 
    /* FORMATTING */
 
+   bin_repr: function (obj) {
+      return BERT.repr(BERT.bytelist(obj));
+   },
+
    // pretty print a JS object in erlang term form
    repr: function (obj) {
       if (obj == null)
