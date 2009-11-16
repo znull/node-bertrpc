@@ -14,38 +14,38 @@
 // - http://www.erlang-factory.com/upload/presentations/36/tom_preston_werner_erlectricity.pdf
 // - http://www.erlang.org/doc/apps/erts/erl_ext_dist.html#8
 //
-// TODO string_to_bytes and Bytelist.toString
-// TODO nil, boolean, dictionary encoding
 // TODO time
 // TODO regex
-// TODO tests
+// TODO push / streaming
 
-/* BERT types are mapped to JavaScript types as follows:
- *
- *         +--------------+----------------+
- *         | BERT         | JavaScript     |
- *         +--------------+----------------+
- *         | atom         | bert.Atom      |
- *         | binary       | String         |
- *         | boolean      | true, false    |
- *         | bytelist     | bert.Bytelist  |
- *         | dictionary   | Object         |
- *         | float        | Number         |
- *         | integer      | Number         |
- *         | list         | Array          |
- *         | nil          | null           |
- *         | regex        | NOT SUPPORTED  |
- *         | tuple        | bert.Tuple     |
- *         | time         | NOT SUPPORTED  |
- *         +--------------+----------------+
- *
- */
+
+// BERT types are mapped to JavaScript types as follows:
+//
+//     +--------------+----------------+
+//     | BERT         | JavaScript     |
+//     +--------------+----------------+
+//     | atom         | bert.Atom      |
+//     | binary       | String         |
+//     | boolean      | true, false    |
+//     | bytelist     | bert.Bytelist  |
+//     | dictionary   | Object         |
+//     | float        | Number         |
+//     | integer      | Number         |
+//     | list         | Array          |
+//     | nil          | null           |
+//     | regex        | NOT SUPPORTED  |
+//     | tuple        | bert.Tuple     |
+//     | time         | NOT SUPPORTED  |
+//     +--------------+----------------+
+//
 
 
 // frequently used atom objects; set after BERT is defined.
 var _bert, _dict, _nil, _true, _false, _reply;
 
-BERT = {
+var BERT = {
+   /* WIRE PROTOCOL CODES */
+
    BERT_START:    String.fromCharCode(131),
    SMALL_ATOM:    String.fromCharCode(115),
    ATOM:          String.fromCharCode(100),
@@ -505,6 +505,7 @@ BERT = {
 
       if (typeof(obj) == 'string')
          return "<<\"" + obj + "\">>";
+
       // numbers, booleans, stuff like that
       if (typeof(obj) != 'object') {
          return obj.toString();

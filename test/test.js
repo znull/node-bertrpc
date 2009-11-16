@@ -38,12 +38,31 @@ TEST = {
 
    assert: function (value, desc) {
       TEST.assertions += 1;
-      if ( desc ) sys.puts(desc);
+      if ( desc ) sys.puts("ASSERT: " + desc);
       if ( !value ) throw 'FAIL';
    },
 
    assert_equal: function (expect, is) {
-      assert(expect == is, expect.toString() + " == " + is.toString());
+      assert(
+         expect == is,
+         sys.inspect(expect) + " == " + sys.inspect(is)
+      );
+   },
+
+   assert_boom: function (message, block) {
+      var error = null;
+      try { block() }
+      catch (boom) { error = boom }
+
+      if ( !error ) {
+         sys.puts('NO BOOM');
+         throw 'FAIL'
+      }
+      if ( error != message ) {
+         sys.puts('BOOM: ' + sys.inspect(error) +
+                  ' [' + sys.inspect(message) + ' expected]');
+         throw 'FAIL'
+      }
    }
 };
 

@@ -14,7 +14,7 @@ var data = null,
 
 // ATOM
 
-obj = BERT.atom("hello");
+obj = bert.atom("hello");
 
 test('bert.repr(<atom>)', function() {
    dump(sys.inspect(obj));
@@ -260,7 +260,7 @@ test('bert.decode([])', function() {
 
 // COMPLEX DICTIONARY
 
-obj = { a: BERT.tuple(1, 2, 3), b: [4, 5, 6] }
+obj = { a: bert.tuple(1, 2, 3), b: [4, 5, 6] }
 
 test('bert.repr(<complex>)', function() {
    dump(sys.inspect(obj));
