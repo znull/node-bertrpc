@@ -1,5 +1,5 @@
 var   sys = require('sys'),
-      rpc = require('../bertrpc');
+      rpc = require('../src/bertrpc');
 
 rpc.expose('math', {
     sum: function(values) {
