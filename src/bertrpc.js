@@ -19,7 +19,8 @@ var sys = require('sys'),
 var bytes_to_int = bert.bytes_to_int,
     int_to_bytes = bert.int_to_bytes,
     t = bert.tuple,
-    _reply = bert.atom('reply');
+    a = bert.atom,
+    _reply = a('reply');
 
 // exposed modules go here.
 var modules = {};
@@ -65,6 +66,66 @@ var BERTRPC = {
       sys.puts("   " + direction + "   " + message);
    },
 
+   // Connect to a remote BERT-RPC service.
+   connect: function (port, host, callback) {
+      var socket = tcp.createConnection(port, host),
+      promises = [],
+      client = {
+         call: function (mod, fun, args, block) {
+            var packet = t(a('call'), a(mod), a(fun), args),
+               promise = new process.Promise();
+            BERTRPC.write(socket, packet);
+            promise.finish = promise.addCallback;
+            if (block) { promise.finish(block) }
+            promises.push(promise);
+            return promise;
+         },
+
+         mod: function (mod) {
+            return {
+              call: function (fun, args, block) {
+                return client.call(mod, fun, args, block);
+              },
+              fun: function (fun) {
+                return function (args, block) {
+                  return client.call(mod, fun, args, block);
+                }
+              }
+            }
+         },
+
+         fun: function (mod, fun) {
+           return function (args, block) {
+             return client.call(mod, fun, args, block);
+           }
+         },
+
+         close: function () {
+           socket.close();
+         }
+      };
+
+      socket.addListener("connect", function () {
+         sys.puts("connect event triggered");
+         callback(client);
+      });
+
+      BERTRPC.read(socket, function (size, term) {
+         var reply = term[0],
+             value = term[1],
+             promise = promises.shift();
+         promise.emitSuccess(value);
+      });
+
+      socket.addListener("eof", function () {
+         var promise = null;
+         while (promise = promises.shift())
+           promise.emitError();
+      });
+
+      return client;
+   },
+
    // The node server. Ready to rock and roll.
    server: tcp.createServer(function (socket) {
       var trace = BERTRPC.trace;
@@ -84,9 +145,9 @@ var BERTRPC = {
 
          // dispatch call to module handler
          var type = term[0].toString(),
-                mod = term[1].toString(),
-                fun = term[2].toString(),
-               args = term[3];
+              mod = term[1].toString(),
+              fun = term[2].toString(),
+             args = term[3];
          var res = BERTRPC.dispatch(type, mod, fun, args);
 
          // encode and throw back over the wire
