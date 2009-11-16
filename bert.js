@@ -110,7 +110,7 @@ BertClass.prototype.encode_bytelist = function(Obj) {
 
 BertClass.prototype.encode_boolean = function(Obj) {
 	if (Obj) return this.encode_inner(this.atom("true"));
-	else return this.encode_inne(this.atom("false"));
+	else return this.encode_inner(this.atom("false"));
 }
 
 BertClass.prototype.encode_number = function(Obj) {
@@ -385,11 +385,11 @@ BertClass.prototype.bignum_to_bytes = function(Int) {
 
 // Encode a list of bytes into an Erlang bignum. 
 BertClass.prototype.bytes_to_bignum = function(S, Count) {
-	var isNegative = (String.charCodeAt(S[0]) == 1);
+	var isNegative = (S.charCodeAt(0) == 1);
 	S = S.substring(1);
 	var Num = 0;
 	for (var i=Count - 1; i>=0; i--) {
-		var n = String.charCodeAt(S[i]);
+		var n = S.charCodeAt(i);
 		if (Num == 0) Num = n;
 		else Num = Num * 256 + n;
 	}
@@ -413,7 +413,7 @@ BertClass.prototype.pp_bytes = function(Bin) {
 	s = "";
 	for (var i=0; i<Bin.length; i++) {
 		if (s != "") s += ",";
-		s += "" + String.charCodeAt(Bin[i]);
+		s += "" + Bin.charCodeAt(i);
 	}
 	return "<<" + s + ">>";
 }
@@ -471,5 +471,12 @@ var Bert = new BertClass();
 if ( exports )
   process.mixin(exports, Bert);
 
-// Bert.test_encode();
-// Bert.test_decode();
+if ( require.main ) {
+   sys = require('sys');
+   sys.puts("running tests");
+   alert = function (text) { sys.puts("alert: " + text); }
+   Bert.test_encode();
+   Bert.test_decode();
+}
+
+// vim: ft=javascript ts=3 sw=3 expandtab
