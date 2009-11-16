@@ -26,11 +26,16 @@ var BERTRPC = {
     return func.apply(module, args);
   },
 
+  trace: function (direction, message) {
+     sys.puts("  " + direction + "  " + message);
+  },
+
   /* the node server */
   server: function () {
+    var trace = BERTRPC.trace;
     return tcp.createServer(function (socket) {
       socket.setEncoding("binary");
-      socket.addListener("connect", function () { sys.puts("  -->  connect"); });
+      socket.addListener("connect", function () { trace("-->", "connect"); });
 
       var buf  = "",
           size = null;
@@ -44,8 +49,8 @@ var BERTRPC = {
             buf = buf.substring(4);
           } else if ( buf.length >= size ) {
             var raw = buf.substring(0, size);
-            var term = bert.decode(raw)[0];
-            sys.puts("  -->  [" + size + "] {" + term + "}");
+            var term = bert.decode(raw);
+            trace("-->", "" + size + ": " + bert.repr(term));
 
             // dispatch call to module handler
             var type = term[0],
@@ -55,9 +60,9 @@ var BERTRPC = {
             var res = BERTRPC.dispatch(type, mod, fun, args);
 
             // encode and throw back over the wire
-            raw = berp.pack(t(REPLY, res));
-            sys.puts("  <--  [" + (raw.length - 4) + "] " + t(REPLY, res));
-            socket.send(raw)
+            var reply = t(REPLY, res);
+            socket.send(raw = berp.pack(reply));
+            trace("<--", "" + (raw.length - 4) + ": " + bert.repr(reply));
 
             // keep eating into the buffer
             buf = buf.substring(size);
@@ -68,9 +73,9 @@ var BERTRPC = {
         }
       });
       socket.addListener("eof", function () {
-        sys.puts("  -->  eof");
-        sys.puts("  <--  close");
+        trace("-->", "eof");
         socket.close();
+        trace("<--", "close");
       });
     });
   },
