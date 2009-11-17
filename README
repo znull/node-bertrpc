@@ -60,7 +60,7 @@ BERT-RPC client) to play at a REPL:
 
     $ sudo gem install bertrpc -s http://gemcutter.org/
     $ irb -rubygems -rbertrpc
-    >> service = BERTRPC::Service('localhost', 7000)
+    >> service = BERTRPC::Service.new('localhost', 7000)
     >> service.call.say.echo('hello', 'world', { 'foo' => %w[bar baz bizle] })
     => ["hello", "world", {:foo=>["bar", "baz", "bizzle"]}]
 
