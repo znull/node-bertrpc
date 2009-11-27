@@ -42,7 +42,7 @@ var BERTRPC = {
          if (typeof(object[fun]) == 'function')
             funs.push(fun);
       }
-      BERTRPC.trace("<--", "exposing: "+mod+" [funs: "+funs.join(", ")+"]");
+      BERTRPC.trace("SERVER", "<--", "exposing: "+mod+" [funs: "+funs.join(", ")+"]");
 
       modules[mod] = object;
       return object;
@@ -73,8 +73,8 @@ var BERTRPC = {
    },
 
    // Write a message to the console/log.
-   trace: function (direction, message) {
-      sys.puts("   " + direction + "   " + message);
+   trace: function (side, direction, message) {
+      sys.puts("  " + direction + "   [" + side + "] " + message);
    },
 
    // The node tcp.Server object -- ready to go. Use BERTRPC.listen
@@ -83,41 +83,45 @@ var BERTRPC = {
       var trace = BERTRPC.trace;
       socket.setEncoding("binary");
 
-      socket.addListener("connect", function () { trace("-->", "connect") });
+      socket.addListener("connect", function () {
+         trace("SERVER", "-->", "connect") });
 
       socket.addListener("eof", function () {
-         trace("-->", "eof");
+         trace("SERVER", "-->", "eof");
          socket.close();
-         trace("<--", "close");
+         trace("SERVER", "<--", "close");
       });
 
       // read BERPs off the wire and dispatch.
       BERTRPC.read(socket, function (size, term) {
-         trace("-->", "" + size + ": " + bert.repr(term));
+         trace("SERVER", "-->", "" + size + ": " + bert.repr(term));
 
          // dispatch call to module handler
          var type = term[0].toString(),
               mod = term[1].toString(),
               fun = term[2].toString(),
              args = term[3];
+
          var res = BERTRPC.dispatch(type, mod, fun, args);
 
          // encode and throw back over the wire
          var reply = t(_reply, res);
          var len = BERTRPC.write(socket, reply);
-         trace("<--", "" + len + ": " + bert.repr(reply));
+         trace("SERVER", "<--", "" + len + ": " + bert.repr(reply));
       });
    }),
 
    // Connect to a remote BERT-RPC service. This is the main client
    // interface.
    connect: function (port, host, callback) {
+      var trace = BERTRPC.trace;
       var socket = tcp.createConnection(port, host),
       promises = [],
       client = {
          call: function (mod, fun, args, block) {
             var packet = t(a('call'), a(mod), a(fun), args),
-               promise = new process.Promise();
+                promise = new process.Promise();
+            trace("CLIENT", "<--", bert.repr(packet));
             BERTRPC.write(socket, packet);
             promise.finish = promise.addCallback;
             if (block) { promise.finish(block) }
@@ -150,7 +154,7 @@ var BERTRPC = {
       };
 
       socket.addListener("connect", function () {
-         sys.puts("connect event triggered");
+         trace("CLIENT", "<--", "connected");
          callback(client);
       });
 
@@ -158,6 +162,7 @@ var BERTRPC = {
          var reply = term[0],
              value = term[1],
              promise = promises.shift();
+         trace("CLIENT", "-->", bert.repr(term));
          promise.emitSuccess(value);
       });
 
