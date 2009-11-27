@@ -93,6 +93,26 @@ test('bert.decode(42)', function() {
    assert_equal(42, obj);
 });
 
+test('bert.encode(144)', function() {
+   data = encode(144);
+   assert_equal("<<131,97,144>>", bin(data));
+});
+
+test('bert.decode(144)', function() {
+   obj = decode(data);
+   assert_equal(144, obj);
+});
+
+test('bert.encode(-144)', function() {
+   data = encode(-144);
+   assert_equal("<<131,98,255,255,255,112>>", bin(data));
+});
+
+test('bert.decode(-144)', function() {
+   obj = decode(data);
+   assert_equal(-144, obj);
+});
+
 test('bert.encode(5000)', function() {
    data = encode(5000);
    assert_equal("<<131,98,0,0,19,136>>", bin(data));

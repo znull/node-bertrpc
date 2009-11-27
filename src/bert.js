@@ -417,11 +417,16 @@ var BERT = {
    },
 
    // Read a big-endian encoded integer from the first length
-   // bytes of the supplied string.
+   // bytes of the supplied string. When length is a single byte,
+   // just return the unsigned byte value.
    bytes_to_int: function (data, length) {
+      if ( length == 1 )
+         return data.charCodeAt(i);
+
       var num = 0,
-          negative = (data.charCodeAt(0) > 128),
+          negative = (length > 1 && data.charCodeAt(0) > 128),
           n = null;
+
       for (var i=0; i < length; i++) {
          n = data.charCodeAt(i);
          if (negative) n = 255 - n;
@@ -503,14 +508,12 @@ var BERT = {
          return "<<\"" + obj + "\">>";
 
       // numbers, booleans, stuff like that
-      if (typeof(obj) != 'object') {
+      if (typeof(obj) != 'object')
          return obj.toString();
-      }
 
       // BERT special types: atom, tuple, bytelist
-      if (obj.repr) {
+      if (obj.repr)
          return obj.repr();
-      }
 
       // arrays
       if (obj.constructor.toString().indexOf("Array") >= 0) {
