@@ -16,6 +16,12 @@ The  bert.js library  was  taken  from  Rusty Klophaus's
 BERT-JS  project:  <http://github.com/rklophaus/BERT-JS>
 but has been modified quite a bit at this point.
 
+STATUS
+
+This library hasn't worked for quite some time due to the
+(backward incompatible) evolution of node.js. I will hope-
+fully have some time to bring it up to the latest soon.
+
 INSTALL
 
 node.js must be installed and available on your PATH
