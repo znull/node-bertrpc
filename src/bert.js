@@ -547,7 +547,6 @@ _false = BERT.atom('false');
 _reply = BERT.atom('reply');
 
 // common JS
-if ( exports )
-  process.mixin(exports, BERT);
+exports = module.exports = BERT;
 
 // vim: ft=javascript ts=3 sw=3 expandtab

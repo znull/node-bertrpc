@@ -15,7 +15,7 @@
 // TODO cast
 
 var sys = require('sys'),
-    tcp = require('tcp'),
+    net = require('net'),
     bert = require('./bert');
 
 var bytes_to_int = bert.bytes_to_int,
@@ -77,9 +77,9 @@ var BERTRPC = {
       sys.puts("  " + direction + "   [" + side + "] " + message);
    },
 
-   // The node tcp.Server object -- ready to go. Use BERTRPC.listen
+   // The node net.Server object -- ready to go. Use BERTRPC.listen
    // if you just want to start a server.
-   server: tcp.createServer(function (socket) {
+   server: net.createServer(function (socket) {
       var trace = BERTRPC.trace;
       socket.setEncoding("binary");
 
@@ -115,7 +115,7 @@ var BERTRPC = {
    // interface.
    connect: function (port, host, callback) {
       var trace = BERTRPC.trace;
-      var socket = tcp.createConnection(port, host),
+      var socket = net.createConnection(port, host),
       promises = [],
       client = {
          call: function (mod, fun, args, block) {
@@ -213,6 +213,6 @@ var BERTRPC = {
    }
 };
 
-process.mixin(exports, BERTRPC);
+exports = module.exports = BERTRPC;
 
 // vim: ts=2 sw=2 expandtab
