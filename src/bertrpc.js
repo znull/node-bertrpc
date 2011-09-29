@@ -12,7 +12,9 @@
 // TODO errors
 // TODO client interface should be more node-like
 // TODO better client calling interface
-// TODO cast
+// TODO: cast(must)
+// TODO: trace should be switchable
+// TODO: logger and error handling
 
 var sys = require('sys'),
     net = require('net'),
@@ -33,6 +35,7 @@ var BERTRPC = {
 
    // Direct access to the modules dictionary.
    modules: modules,
+   logger: console,
 
    // Expose all functions in object under the given BERTPRPC module
    // name. This should be called before bertrpc.listen.
@@ -83,13 +86,13 @@ var BERTRPC = {
       var trace = BERTRPC.trace;
       socket.setEncoding("binary");
 
-      socket.addListener("connect", function () {
+      socket.on("connect", function () {
          trace("SERVER", "-->", "connect") });
 
-      socket.addListener("eof", function () {
-         trace("SERVER", "-->", "eof");
-         socket.close();
-         trace("SERVER", "<--", "close");
+      socket.on("end", function () {
+         trace("SERVER", "-->", "end");
+         socket.end();
+         trace("SERVER", "<--", "end");
       });
 
       // read BERPs off the wire and dispatch.
@@ -116,17 +119,14 @@ var BERTRPC = {
    connect: function (port, host, callback) {
       var trace = BERTRPC.trace;
       var socket = net.createConnection(port, host),
-      promises = [],
+      blocks = [],
       client = {
          call: function (mod, fun, args, block) {
-            var packet = t(a('call'), a(mod), a(fun), args),
-                promise = new process.Promise();
+            var packet = t(a('call'), a(mod), a(fun), args);
             trace("CLIENT", "<--", bert.repr(packet));
             BERTRPC.write(socket, packet);
-            promise.finish = promise.addCallback;
-            if (block) { promise.finish(block) }
-            promises.push(promise);
-            return promise;
+            if (block) { blocks.push(block) }
+            return this;
          },
 
          mod: function (mod) {
@@ -142,18 +142,23 @@ var BERTRPC = {
             }
          },
 
+         finish: function(block) {
+            blocks.push(block);
+         },
+
          fun: function (mod, fun) {
            return function (args, block) {
              return client.call(mod, fun, args, block);
            }
          },
 
-         close: function () {
-           socket.close();
+         end: function () {
+           socket.end();
          }
       };
 
-      socket.addListener("connect", function () {
+      socket.setEncoding("binary");
+      socket.on("connect", function () {
          trace("CLIENT", "<--", "connected");
          callback(client);
       });
@@ -161,15 +166,13 @@ var BERTRPC = {
       BERTRPC.read(socket, function (size, term) {
          var reply = term[0],
              value = term[1],
-             promise = promises.shift();
+             block = blocks.shift();
          trace("CLIENT", "-->", bert.repr(term));
-         promise.emitSuccess(value);
+         block(value);
       });
 
-      socket.addListener("eof", function () {
-         var promise = null;
-         while (promise = promises.shift())
-           promise.emitError();
+      socket.on("end", function () {
+         blocks = [];
       });
 
       return client;
@@ -179,18 +182,25 @@ var BERTRPC = {
    // callback should accept size and term arguments, where size
    // is the length of the BERT packet in bytes and term is the
    // decoded object payload.
-   read: function (fd, callback) {
+   read: function (socket, callback) {
       var size = null, buf = "";
-      fd.addListener("receive", function(data) {
-          buf += data;
+      socket.on("data", function(data) {
+          buf += data.toString("binary");
           while (size || buf.length >= 4) {
              if (size == null) {
                 // read BERP length header and adjust buffer
                 size = bytes_to_int(buf, 4);
                 buf = buf.substring(4);
              } else if (buf.length >= size) {
-                // TODO error handling
-                callback(size, bert.decode(buf.substring(0, size)));
+                // TODO: improve error handling
+                // should take care of:
+                // * incorrect BERT-packet
+                // * call exception
+                try {
+                   callback(size, bert.decode(buf.substring(0, size)));
+                } catch (e) {
+                   BERTRPC.logger.error(e);
+                }
                 buf = buf.substring(size);
                 size = null;
              } else {
@@ -203,12 +213,13 @@ var BERTRPC = {
 
    // Write the object specified by the second argument to the
    // socket or file descriptor in the first argument. This
-   // BERT encodes the term and writes the result on the fd with
+   // BERT encodes the term and writes the result on the socket with
    // a four byte BERP length header.
-   write: function (fd, term) {
-      var data = bert.encode(term);
-      fd.send(int_to_bytes(data.length, 4));
-      fd.send(data);
+   write: function (socket, term) {
+      var data = bert.encode(term),
+          // don't use raw strings to send binary data
+          packet = new Buffer(int_to_bytes(data.length, 4) + data, "binary");
+      socket.write(packet);
       return data.length;
    }
 };
