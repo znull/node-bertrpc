@@ -33,5 +33,5 @@ rpc.connect(7000, 'localhost', function (service) {
    });
 
    sys.debug("client closing connection");
-   service.close();
+   service.end();
 });
