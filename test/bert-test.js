@@ -1,6 +1,8 @@
 var sys = require('sys'),
-   bert = require('../src/bert');
-process.mixin(GLOBAL, require('./test'));
+    bert = require('../src/bert'),
+    test_helper = require('./test');
+
+test_helper.extend(GLOBAL, test_helper);
 
 var encode = bert.encode,
     decode = bert.decode,

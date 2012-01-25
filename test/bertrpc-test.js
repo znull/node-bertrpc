@@ -1,8 +1,10 @@
-process.mixin(GLOBAL, require('./test'));
 
 var sys = require('sys'),
 bertrpc = require('../src/bertrpc'),
-   bert = require('../src/bert');
+    bert = require('../src/bert'),
+    test_helpers = require('./test');
+
+test_helpers.extend(GLOBAL, test_helpers);
 
 var TestModule = {
    foo: function (a, b) {
