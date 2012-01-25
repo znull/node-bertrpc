@@ -1,15 +1,15 @@
-var sys = require('sys'),
-    bert = require('../src/bert'),
-    test_helper = require('./test');
+var util = require('util'),
+   bert = require('../src/bert'),
+   test_helper = require('./test');
 
 test_helper.extend(GLOBAL, test_helper);
 
 var encode = bert.encode,
     decode = bert.decode,
     R =      bert.repr,
-    dump =   function (obj) { sys.puts(obj) },
+    dump =   function (obj) { util.puts(obj) },
     bin =    bert.bin_repr,
-    dump_bin = function (obj) { sys.puts(bert.bin_repr(obj)) };
+    dump_bin = function (obj) { util.puts(bert.bin_repr(obj)) };
 
 var data = null,
     obj  = null;
@@ -19,7 +19,7 @@ var data = null,
 obj = bert.atom("hello");
 
 test('bert.repr(<atom>)', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal("hello", bert.repr(obj));
 });
@@ -40,7 +40,7 @@ test('bert.decode(<atom>)', function() {
 obj = "hello";
 
 test('bert.repr(<atom>)', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal('<<"hello">>', bert.repr(obj));
 });
@@ -60,7 +60,7 @@ test('bert.decode(<binary>)', function() {
 obj = true
 
 test('bert.repr(true)', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal('<true>', bert.repr(obj));
 });
@@ -72,7 +72,7 @@ test('bert.encode(true)', function() {
 
 test('bert.decode(true)', function() {
    obj = decode(data);
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    assert_equal(true, obj);
 });
 
@@ -195,7 +195,7 @@ test('bert.encode([1, 2, 3])', function() {
 });
 
 test('bert.repr([1, 2, 3])', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal("[1, 2, 3]", bert.repr(obj));
 });
@@ -214,7 +214,7 @@ test('bert.decode([1, 2, 3])', function() {
 obj = {a:1, b:2, c:3};
 
 test('bert.repr({a:1, b:2, c:3})', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal("[{a, 1}, {b, 2}, {c, 3}]", bert.repr(obj));
 });
@@ -228,9 +228,9 @@ test('bert.encode({a:1, b:2, c:3})', function() {
 });
 
 test('bert.decode({a:1, b:2, c:3})', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    obj = decode(data);
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal(1, obj['a']);
    assert_equal(2, obj['b']);
@@ -247,7 +247,7 @@ test('bert.encode(<tuple>)', function() {
 });
 
 test('bert.repr(<tuple>)', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal('{<<"Hello">>, 1}', bert.repr(obj));
 });
@@ -265,7 +265,7 @@ test('bert.decode(<tuple>)', function() {
 obj = []
 
 test('bert.repr([])', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal('[]', bert.repr(obj));
 });
@@ -285,7 +285,7 @@ test('bert.decode([])', function() {
 obj = { a: bert.tuple(1, 2, 3), b: [4, 5, 6] }
 
 test('bert.repr(<complex>)', function() {
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal("[{a, {1, 2, 3}}, {b, [4, 5, 6]}]", bert.repr(obj));
 });
@@ -302,7 +302,7 @@ test('bert.encode(<complex>)', function () {
 
 test('bert.decode(<complex>)', function() {
    obj = decode(data);
-   dump(sys.inspect(obj));
+   dump(util.inspect(obj));
    dump(R(obj));
    assert_equal('object', typeof(obj));
    assert_equal('tuple',  obj.a.type);

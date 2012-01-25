@@ -1,4 +1,4 @@
-var sys = require('sys'),
+var util = require('util'),
     rpc = require('../src/bertrpc');
 
 // connect to the server
@@ -9,9 +9,9 @@ rpc.connect(7001, 'localhost', function (service) {
 
    // call the math module's sum function with a few integers
    // and print the result
-   sys.debug("math client summing [1, 2, 3]");
+   util.debug("math client summing [1, 2, 3]");
    mathrpc.call('sum', [[1, 2, 3]], function (result) {
-       sys.debug("math client got: " + sys.inspect(result));
+       util.debug("math client got: " + util.inspect(result));
    });
 
    // calculate a fibonacci number and pass the result to
@@ -32,6 +32,6 @@ rpc.connect(7001, 'localhost', function (service) {
 
    // calculate the 25th fibonacci number
    fib(25, function (number) {
-     sys.debug("the 25th fibonacci number is " + number);
+     util.debug("the 25th fibonacci number is " + number);
    });
 });

@@ -1,4 +1,4 @@
-var   sys = require('sys'),
+var   util = require('util'),
       rpc = require('../src/bertrpc');
 
 rpc.expose('math', {

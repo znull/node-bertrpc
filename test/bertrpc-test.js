@@ -1,5 +1,5 @@
 
-var sys = require('sys'),
+var util = require('util'),
 bertrpc = require('../src/bertrpc'),
     bert = require('../src/bert'),
     test_helpers = require('./test');
