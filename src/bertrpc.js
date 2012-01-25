@@ -16,7 +16,7 @@
 // TODO: trace should be switchable
 // TODO: logger and error handling
 
-var sys = require('sys'),
+var util = require('util'),
     net = require('net'),
     bert = require('./bert');
 
@@ -77,7 +77,7 @@ var BERTRPC = {
 
    // Write a message to the console/log.
    trace: function (side, direction, message) {
-      sys.puts("  " + direction + "   [" + side + "] " + message);
+      util.puts("  " + direction + "   [" + side + "] " + message);
    },
 
    // The node net.Server object -- ready to go. Use BERTRPC.listen

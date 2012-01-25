@@ -1,6 +1,6 @@
 process.mixin(GLOBAL, require('./test'));
 
-var sys = require('sys'),
+var util = require('util'),
 bertrpc = require('../src/bertrpc'),
    bert = require('../src/bert');
 
