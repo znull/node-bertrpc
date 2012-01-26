@@ -14,30 +14,6 @@ var encode = bert.encode,
 var data = null,
     obj  = null;
 
-// LISTS
-
-obj = [1, 2, 3]
-
-test('bert.encode([1, 2, 3])', function() {
-   data = encode(obj);
-   assert_equal("<<131,108,0,0,0,3,97,1,97,2,97,3,106>>", bin(data));
-});
-
-test('bert.repr([1, 2, 3])', function() {
-   dump(util.inspect(obj));
-   dump(R(obj));
-   assert_equal("[1, 2, 3]", bert.repr(obj));
-});
-
-test('bert.decode([1, 2, 3])', function() {
-   obj = decode(data);
-   assert_equal('object', typeof(obj));
-   assert_equal(3, obj.length);
-   assert_equal(1, obj[0]);
-   assert_equal(2, obj[1]);
-   assert_equal(3, obj[2]);
-});
-
 // DICTIONARIES
 
 obj = {a:1, b:2, c:3};
