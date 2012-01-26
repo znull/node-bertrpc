@@ -14,33 +14,6 @@ var encode = bert.encode,
 var data = null,
     obj  = null;
 
-// DICTIONARIES
-
-obj = {a:1, b:2, c:3};
-
-test('bert.repr({a:1, b:2, c:3})', function() {
-   dump(util.inspect(obj));
-   dump(R(obj));
-   assert_equal("[{a, 1}, {b, 2}, {c, 3}]", bert.repr(obj));
-});
-
-test('bert.encode({a:1, b:2, c:3})', function() {
-   data = encode(obj);
-   assert_equal(
-      "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,0,0,0,3,104,2,100,0,1,97,97,1,104,2,100,0,1,98,97,2,104,2,100,0,1,99,97,3,106>>",
-      bin(data)
-   );
-});
-
-test('bert.decode({a:1, b:2, c:3})', function() {
-   dump(util.inspect(obj));
-   obj = decode(data);
-   dump(util.inspect(obj));
-   dump(R(obj));
-   assert_equal(1, obj['a']);
-   assert_equal(2, obj['b']);
-   assert_equal(3, obj['c']);
-});
 
 // TUPLES
 
