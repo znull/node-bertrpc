@@ -14,56 +14,6 @@ var encode = bert.encode,
 var data = null,
     obj  = null;
 
-// BIG INTEGERS
-
-test('bert.encode(987654321)', function() {
-   data = encode(987654321);
-   assert_equal("<<131,110,4,0,177,104,222,58>>", bin(data));
-});
-
-test('bert.decode(987654321)', function() {
-   obj = decode(data);
-   assert_equal(987654321, obj);
-});
-
-test('bert.encode(-987654321)', function() {
-   data = encode(-987654321);
-   assert_equal("<<131,110,4,1,177,104,222,58>>", bin(data));
-});
-
-test('bert.decode(-987654321)', function() {
-   obj = decode(data);
-   assert_equal(-987654321, obj);
-});
-
-// FLOAT
-
-test('bert.encode(3.14159)', function() {
-   data = encode(3.14159);
-   assert_equal(
-      "<<131,99,51,46,49,52,49,53,57,101,43,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0>>",
-      bin(data)
-   );
-});
-
-test('bert.decode(3.14159)', function() {
-   obj = decode(data);
-   assert_equal(3.14159, obj);
-});
-
-test('bert.encode(-3.14159)', function() {
-   data = encode(-3.14159);
-   assert_equal(
-      "<<131,99,45,51,46,49,52,49,53,57,101,43,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0>>",
-      bin(encode(-3.14159))
-   );
-});
-
-test('bert.decode(-3.14159)', function() {
-   obj = decode(data);
-   assert_equal(-3.14159, obj);
-});
-
 // LISTS
 
 obj = [1, 2, 3]
