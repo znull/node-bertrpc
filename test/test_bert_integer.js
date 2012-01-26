@@ -5,8 +5,6 @@ var bert = require('../src/bert');
 exports.testIntegerRepr = function(test) {
     test.strictEqual(bert.repr(42),'42');
     test.strictEqual(bert.repr(-42),'-42');
-    test.strictEqual(bert.repr(28421841298),'28421841298');
-    test.strictEqual(bert.repr(-28421841298),'-28421841298');
     test.done();
 };
 
