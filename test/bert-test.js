@@ -15,28 +15,6 @@ var data = null,
     obj  = null;
 
 
-// TUPLES
-
-obj = bert.tuple("Hello", 1);
-
-test('bert.encode(<tuple>)', function() {
-   data = encode(obj);
-   assert_equal("<<131,104,2,109,0,0,0,5,72,101,108,108,111,97,1>>", bin(data))
-});
-
-test('bert.repr(<tuple>)', function() {
-   dump(util.inspect(obj));
-   dump(R(obj));
-   assert_equal('{<<"Hello">>, 1}', bert.repr(obj));
-});
-
-test('bert.decode(<tuple>)', function() {
-   obj = decode(data);
-   assert_equal("tuple", obj.type);
-   assert_equal(2, obj.length);
-   assert_equal("Hello", obj[0]);
-   assert_equal(1, obj[1]);
-});
 
 // EMPTY LISTS
 
