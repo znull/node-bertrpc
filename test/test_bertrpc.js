@@ -1,4 +1,5 @@
 var nodeunit = require('nodeunit');
+
 var bertrpc = require('../src/bertrpc');
 var bert = require('../src/bert');
 
