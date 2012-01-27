@@ -16,26 +16,6 @@ var data = null,
 
 
 
-// EMPTY LISTS
-
-obj = []
-
-test('bert.repr([])', function() {
-   dump(util.inspect(obj));
-   dump(R(obj));
-   assert_equal('[]', bert.repr(obj));
-});
-
-test('bert.encode([])', function() {
-   data = encode(obj)
-   assert_equal("<<131,108,0,0,0,0,106>>", bin(data))
-});
-
-test('bert.decode([])', function() {
-   obj = decode(data);
-   assert_equal(0, obj.length);
-});
-
 // COMPLEX DICTIONARY
 
 obj = { a: bert.tuple(1, 2, 3), b: [4, 5, 6] }

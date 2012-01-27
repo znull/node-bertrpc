@@ -23,3 +23,21 @@ exports.testListDecode = function(test) {
     test.strictEqual(obj[2], 3);
     test.done();
 };
+
+exports.testEmptyListRepr = function(test) {
+    test.strictEqual('[]', bert.repr([]));
+    test.done();
+};
+
+exports.testEmptyListEncode = function(test) {
+    var data = bert.encode([]);
+    test.strictEqual(bert.bin_repr(data), "<<131,108,0,0,0,0,106>>");
+    test.done();
+};
+
+exports.testEmptyListDecode = function(test) {
+    var data = bert.encode([]);
+    var obj = bert.decode(data);
+    test.strictEqual(obj.length, 0);
+    test.done();
+};
