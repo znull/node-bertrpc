@@ -135,6 +135,12 @@ bert.decode deserializes a BERT, creating an object graph:
     node> bert.decode("\u0083m\u0000\u0000\u0000\u0005hello")
     "hello"
 
+DEVELOPMENT
+
+The tests have been converted to use `nodeunit`. Make sure it is installed
+and available in your path, then run `nodeunit test/test_*` to execute the
+tests.
+
 SEE ALSO
 
 CODE: git clone git://github.com/rtomayko/node-bertrpc.git
