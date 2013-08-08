@@ -115,11 +115,19 @@ var BERT = {
       return BERT.BERT_START + BERT.encode_inner(obj);
    },
 
+   encode_to_buffer: function (obj) {
+      return new Buffer(BERT.string_to_bytelist(BERT.encode(obj)));
+   },
+
    decode: function (data) {
       if (data[0] != BERT.BERT_START) throw("Not a valid BERT.");
       var obj = BERT.decode_inner(data.substring(1));
       if (obj.rest != "") throw("Invalid BERT.");
       return obj.value;
+   },
+
+   decode_buffer: function (buf) {
+      return BERT.decode(buf.toString('binary'));
    },
 
    /* ENCODING */
