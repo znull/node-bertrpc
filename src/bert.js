@@ -243,7 +243,7 @@ var BERT = {
    encode_dictionary: function (obj) {
       var array = new Array();
       for (var key in obj)
-         array.push(this.tuple(this.atom(key), obj[key]));
+         array.push(this.tuple(key, obj[key]));
       return this.encode_tup(_bert, _dict, array);
    },
 

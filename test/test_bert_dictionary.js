@@ -8,7 +8,7 @@ exports.testDictRepr = function(test) {
 
 exports.testDictEncode = function(test) {
     var data = bert.encode({a:1, b:2, c:3});
-    var expected = "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,0,0,0,3,104,2,100,0,1,97,97,1,104,2,100,0,1,98,97,2,104,2,100,0,1,99,97,3,106>>";
+    var expected = "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,0,0,0,3,104,2,109,0,0,0,1,97,97,1,104,2,109,0,0,0,1,98,97,2,104,2,109,0,0,0,1,99,97,3,106>>";
     test.strictEqual(bert.bin_repr(data), expected);
     test.done();
 };
@@ -31,9 +31,7 @@ exports.testComplexDictRepr = function(test) {
 exports.testComplexDictEncode = function(test) {
     var obj = { a: bert.tuple(1, 2, 3), b: [4, 5, 6] };
     var data = bert.encode(obj);
-    var expected = "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,"  +
-        "0,0,0,2,104,2,100,0,1,97,104,3,97,1,97,2,97,3,104,2,100,0,1,98," +
-        "108,0,0,0,3,97,4,97,5,97,6,106,106>>";
+    var expected = "<<131,104,3,100,0,4,98,101,114,116,100,0,4,100,105,99,116,108,0,0,0,2,104,2,109,0,0,0,1,97,104,3,97,1,97,2,97,3,104,2,109,0,0,0,1,98,108,0,0,0,3,97,4,97,5,97,6,106,106>>";
     test.strictEqual(bert.bin_repr(data), expected);
     test.done();
 };
