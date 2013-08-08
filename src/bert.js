@@ -120,9 +120,9 @@ var BERT = {
    },
 
    decode: function (data) {
-      if (data[0] != BERT.BERT_START) throw("Not a valid BERT.");
+      if (data[0] != BERT.BERT_START) throw new Error("Not a valid BERT.");
       var obj = BERT.decode_inner(data.substring(1));
-      if (obj.rest != "") throw("Invalid BERT.");
+      if (obj.rest != "") throw new Error("Invalid BERT.");
       return obj.value;
    },
 
@@ -269,7 +269,7 @@ var BERT = {
       if (type == this.SMALL_TUPLE) return this.decode_tuple(data, 1);
       if (type == this.LARGE_TUPLE) return this.decode_large_tuple(data, 4);
       if (type == this.NIL) return this.decode_nil(data);
-      throw("Unexpected BERT type: " + String.charCodeAt(type));
+      throw new Error("Unexpected BERT type: " + String.charCodeAt(type));
    },
 
    decode_atom: function (data, count) {
@@ -350,7 +350,7 @@ var BERT = {
          data = element.rest;
       }
       var last = data[0];
-      if (last != this.NIL) throw("List does not end with NIL!");
+      if (last != this.NIL) throw new Error("List does not end with NIL!");
       data = data.substring(1);
       return {
          value: array,
@@ -389,7 +389,7 @@ var BERT = {
          else if ( array[1] == _true )   { value = true;  }
          else if ( array[1] == _false )  { value = false; }
          else
-            throw 'unsupported complex tuple: {bert, ' + array[1] + '}';
+            throw new Error('unsupported complex tuple: {bert, ' + array[1] + '}');
       }else{
          value = this.tup(array);
       }
@@ -420,7 +420,7 @@ var BERT = {
          data = String.fromCharCode(remainder) + data;
          int = Math.floor(int / 256);
       }
-      if (int > 0) throw("Argument out of range: " + orig);
+      if (int > 0) throw new Error("Argument out of range: " + orig);
       return data;
    },
 
