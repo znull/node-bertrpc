@@ -390,7 +390,7 @@ var BERT = {
 
    decode_nil: function (data) {
       return {
-         value: null,
+         value: [],
          rest:  data
       };
    },
