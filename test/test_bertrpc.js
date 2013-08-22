@@ -61,8 +61,8 @@ exports.testReadBerpFromFD = function(test) {
     var berp = bert.int_to_bytes(packet.length, 4) + packet;
 
     var fd = {
-        addListener: function (event, callback) {
-            test.equals(event, 'receive');
+        on: function (event, callback) {
+            test.equals(event, 'data');
             callback(berp + berp + berp);
         }
     };
