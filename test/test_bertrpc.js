@@ -80,8 +80,8 @@ exports.testReadBerpFromFD = function(test) {
 exports.testWriteBerpToFD = function(test) {
     var buf = '';
     var fd = {
-        send: function (data) {
-            buf += data;
+        write: function (data) {
+            buf += data.toString('binary');
         }
     };
 
