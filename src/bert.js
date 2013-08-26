@@ -51,6 +51,7 @@ var BERT = {
    SMALL_BIG:     String.fromCharCode(110),
    LARGE_BIG:     String.fromCharCode(111),
    FLOAT:         String.fromCharCode(99),
+   NEW_FLOAT:     String.fromCharCode(70),
    STRING:        String.fromCharCode(107),
    LIST:          String.fromCharCode(108),
    SMALL_TUPLE:   String.fromCharCode(104),
@@ -264,6 +265,7 @@ var BERT = {
       if (type == this.SMALL_BIG) return this.decode_big(data, 1);
       if (type == this.LARGE_BIG) return this.decode_big(data, 4);
       if (type == this.FLOAT) return this.decode_float(data);
+      if (type == this.NEW_FLOAT) return this.decode_new_float(data);
       if (type == this.STRING) return this.decode_bytelist(data);
       if (type == this.LIST) return this.decode_list(data);
       if (type == this.SMALL_TUPLE) return this.decode_tuple(data, 1);
@@ -327,6 +329,14 @@ var BERT = {
       var size = 31;
       return {
          value: parseFloat(data.substring(0, size)),
+         rest: data.substring(size)
+      };
+   },
+
+   decode_new_float: function (data) {
+      var size = 8;
+      return {
+         value: new Buffer(data.substring(0, size), 'binary').readDoubleBE(0, true),
          rest: data.substring(size)
       };
    },

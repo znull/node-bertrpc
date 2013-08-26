@@ -35,3 +35,10 @@ exports.testFloatDecode = function(test) {
     test.done();
 };
 
+exports.testNewFloatDecode = function(test) {
+    pi = 3.14159;
+    piEncoded = new Buffer([131, 70, 64, 9, 33, 249, 240, 27, 134, 110]);
+    var actual = bert.decode_buffer(piEncoded);
+    test.strictEqual(actual, pi);
+    test.done();
+};
