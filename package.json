@@ -13,7 +13,7 @@
     "nodeunit": "~0.9.0"
   },
   "scripts": {
-    "test": "make tests"
+    "test": "nodeunit test/test_*.js"
   },
   "repository": {
     "type": "git",
