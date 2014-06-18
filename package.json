@@ -1,0 +1,39 @@
+{
+  "name": "node-bertrpc",
+  "version": "1.0.0",
+  "description": "BERT-RPC is a schemaless binary remote procedure call protocol",
+  "main": "src/bertrpc.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "nodeunit": "~0.9.0"
+  },
+  "scripts": {
+    "test": "nodeunit test/test_*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/znull/node-bertrpc.git"
+  },
+  "keywords": [
+    "bert",
+    "rpc",
+    "binary",
+    "erlang",
+    "term"
+  ],
+  "author": "Ryan Tomayko",
+  "contributors": [
+    "Jason Lunz",
+    "Rusty Klophaus",
+    "Ben Browning"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/znull/node-bertrpc/issues"
+  }
+}
