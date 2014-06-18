@@ -1,12 +1,14 @@
 // bert.js
 //
-// Copyright (c) 2009 Ryan Tomayko <tomayko.com/about>
+// Copyright (c) 2014 Jason Lunz
 // See COPYING for licensing information.
-// <http://github.com/rtomayko/node-bertrpc>
+// <http://github.com/znull/node-bertrpc>
 //
-// Based heavily on the BERT-JS library by Rusty Klophaus:
+// Based heavily on the BERT-JS library by Rusty Klophaus & Ryan Tomayko:
+// <http://github.com/rtomayko/node-bertrpc>
 // <http://github.com/rklophaus/BERT-JS>
 //
+// Copyright (c) 2009 Ryan Tomayko <tomayko.com/about>
 // Copyright (c) 2009 Rusty Klophaus (@rklophaus)
 // Contributions by Ben Browning (@bbrowning)
 //
