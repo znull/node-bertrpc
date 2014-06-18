@@ -18,9 +18,7 @@ but has been modified quite a bit at this point.
 
 STATUS
 
-This library hasn't worked for quite some time due to the
-(backward incompatible) evolution of node.js. I will hope-
-fully have some time to bring it up to the latest soon.
+This package is lightly maintained in hopes somebody finds it useful.
 
 INSTALL
 
