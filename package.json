@@ -1,6 +1,6 @@
 {
   "name": "node-bertrpc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "BERT-RPC is a schemaless binary remote procedure call protocol",
   "main": "src/bertrpc.js",
   "directories": {
