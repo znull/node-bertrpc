@@ -73,7 +73,7 @@ var BERT = {
    Bytelist: function (string) {
       this.type = "bytelist";
       this.value = string;
-      this.toString = function () { this.value }
+      this.toString = function () { return this.value }
       this.repr = function () {
          var bytes = BERT.string_to_bytelist(this.value),
              string= "";
